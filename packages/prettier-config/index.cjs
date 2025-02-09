@@ -24,4 +24,4 @@ const config = {
   importOrderTypeScriptVersion: "5.7.3",
 };
 
-export default config;
+module.exports = config;
