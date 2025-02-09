@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 
-import { prisma } from "@repo/database";
+import { prisma } from "@repo/db";
 
 import { auth } from "~/auth";
 import { SessionUser } from "~/types/user";
