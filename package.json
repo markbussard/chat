@@ -15,5 +15,8 @@
   "engines": {
     "node": ">=18"
   },
-  "prettier": "@repo/prettier-config"
+  "prettier": "@repo/prettier-config",
+  "dependencies": {
+    "@prisma/client": "^6.3.1"
+  }
 }
