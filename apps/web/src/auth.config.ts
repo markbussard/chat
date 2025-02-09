@@ -20,9 +20,7 @@ export const authConfig: NextAuthConfig = {
           id: profile.sub,
           email: profile.email,
           name: profile.name,
-          image: profile.picture,
-          firstName: profile.given_name,
-          lastName: profile.family_name
+          image: profile.picture
         };
       }
     })
