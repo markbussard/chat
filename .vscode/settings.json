@@ -1,7 +1,19 @@
 {
-  "eslint.workingDirectories": [
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "typescript.preferences.importModuleSpecifier": "shortest",
+  "eslint.rules.customizations": [
     {
-      "mode": "auto"
+      "rule": "*",
+      "severity": "warn"
     }
-  ]
+  ],
+  "css.lint.unknownAtRules": "ignore"
 }
