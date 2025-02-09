@@ -1,0 +1,26 @@
+{
+  "name": "@repo/db",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "db:generate": "pnpm prisma generate",
+    "db:push": "pnpm prisma db push",
+    "db:migrate": "pnpm prisma migrate dev --skip-generate",
+    "db:deploy": "pnpm prisma migrate deploy"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22",
+    "prisma": "^6.3.1",
+    "typescript": "5.7.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1"
+  },
+  "prettier": "@repo/prettier-config"
+}
