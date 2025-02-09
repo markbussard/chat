@@ -94,9 +94,21 @@ importers:
         specifier: ^6.3.1
         version: 6.3.1(prisma@6.3.1(typescript@5.7.3))(typescript@5.7.3)
     devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/prettier-config':
+        specifier: workspace:*
+        version: link:../prettier-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
       prisma:
         specifier: ^6.3.1
         version: 6.3.1(typescript@5.7.3)
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
 
   packages/eslint-config:
     devDependencies:
