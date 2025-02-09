@@ -6,7 +6,8 @@ import basePrettierConfig from "@repo/prettier-config";
 
 /** @type { PrettierConfig | SortImportsConfig | TailwindConfig } */
 const prettierConfig = {
-  ...basePrettierConfig
+  ...basePrettierConfig,
+  tailwindStylesheet: './src/app/globals.css'
 }
 
 export default prettierConfig
