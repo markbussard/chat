@@ -106,6 +106,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/node':
+        specifier: ^22
+        version: 22.13.0
       prisma:
         specifier: ^6.3.1
         version: 6.3.1(typescript@5.7.3)
