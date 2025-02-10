@@ -1,17 +1,19 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-
 import "./globals.css";
 
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+
+import { cn } from "~/lib/utils";
 import { Providers } from "./providers";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans"
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"]
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono"
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"]
 });
 
 export const metadata: Metadata = {
@@ -25,10 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(geistSans.variable, geistMono.variable)}
+    >
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>
