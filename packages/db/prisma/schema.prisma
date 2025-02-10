@@ -19,6 +19,7 @@ model User {
 
   accounts       Account[]
   authenticators Authenticator[]
+  chats          Chat[]
 
   @@map("users")
 }
@@ -68,4 +69,39 @@ model Authenticator {
 
   @@id([userId, credentialID])
   @@map("authenticators")
+}
+
+model Chat {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  name      String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@map("chats")
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  chatId    String        @map("chat_id")
+  text      String
+  sender    MessageSender
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime?     @map("deleted_at") @db.Timestamptz
+
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+enum MessageSender {
+  USER
+  ASSISTANT
+
+  @@map("message_sender")
 }
