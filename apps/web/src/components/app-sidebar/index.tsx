@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -7,6 +8,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
@@ -15,6 +17,7 @@ import {
   SidebarTrigger
 } from "~/components/ui/sidebar";
 import { NavUser } from "./nav-user";
+import { RecentChats, RecentChatsSkeleton } from "./recent-chats";
 
 export async function AppSidebar() {
   return (
@@ -40,6 +43,11 @@ export async function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Recents</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <Suspense fallback={<RecentChatsSkeleton />}>
+              <RecentChats />
+            </Suspense>
+          </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
