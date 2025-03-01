@@ -6,7 +6,9 @@
     "dev": "nodemon",
     "build": "tsc",
     "start": "node dist/app.js",
-    "lint": "echo 'Add lint script here'"
+    "check-types": "tsc --noEmit",
+    "format": "prettier . --check",
+    "format:write": "prettier . --write"
   },
   "dependencies": {
     "@repo/db": "workspace:*",
