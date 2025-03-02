@@ -1,7 +1,6 @@
 import { Suspense } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Bot, Plus } from "lucide-react";
 
 import {
   Sidebar,
@@ -22,9 +21,11 @@ import { RecentChats, RecentChatsSkeleton } from "./recent-chats";
 export async function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarHeader className="px-4">
-        <div className="flex items-center justify-between">
-          <Image priority src="/logo.jpg" alt="" height={40} width={40} />
+      <SidebarHeader className="px-4 py-3">
+        <div className="flex justify-between">
+          <div className="flex aspect-square items-center justify-center rounded-lg">
+            <Bot className="size-6" />
+          </div>
           <SidebarTrigger />
         </div>
       </SidebarHeader>
