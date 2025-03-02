@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { toast } from "sonner";
 
 import {
   DropdownMenu,
@@ -31,6 +32,9 @@ import {
   SidebarMenuItem,
   useSidebar
 } from "~/components/ui/sidebar";
+import { META_THEME_COLORS } from "~/constants";
+import { useMetaThemeColor } from "~/hooks/use-meta-theme-color";
+import { parseError } from "~/lib/utils";
 import { SessionUser } from "~/types/user";
 
 interface UserProfileMenuButtonProps {
@@ -43,6 +47,32 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
   const { isMobile } = useSidebar();
 
   const { theme, setTheme } = useTheme();
+  const { setMetaThemeColor } = useMetaThemeColor();
+
+  const toggleTheme = (value: "dark" | "light" | "system") => {
+    setTheme(value);
+    if (value === "light") {
+      setMetaThemeColor(META_THEME_COLORS.LIGHT);
+    } else if (value === "dark") {
+      setMetaThemeColor(META_THEME_COLORS.DARK);
+    } else if (value === "system") {
+      // For system theme, check the preferred color scheme
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "DARK"
+        : "LIGHT";
+      setMetaThemeColor(META_THEME_COLORS[systemTheme]);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirectTo: "/login" });
+    } catch (error) {
+      const { message } = parseError(error);
+      toast.error(message);
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -78,27 +108,24 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                {/* <Settings /> */}
-                Settings
-              </DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   <span>Appearance</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    <DropdownMenuItem onClick={() => setTheme("system")}>
+                    <DropdownMenuItem onClick={() => toggleTheme("system")}>
                       <MonitorCheck />
                       <span>System</span>
                       {theme === "system" && <Check className="ml-auto" />}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("light")}>
+                    <DropdownMenuItem onClick={() => toggleTheme("light")}>
                       <Sun />
                       <span>Light</span>
                       {theme === "light" && <Check className="ml-auto" />}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    <DropdownMenuItem onClick={() => toggleTheme("dark")}>
                       <Moon />
                       <span>Dark</span>
                       {theme === "dark" && <Check className="ml-auto" />}
@@ -108,11 +135,7 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
               </DropdownMenuSub>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                signOut({ redirectTo: "/login" });
-              }}
-            >
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>
