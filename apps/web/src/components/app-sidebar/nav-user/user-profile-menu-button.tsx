@@ -83,7 +83,14 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Image priority src="/logo.jpg" alt="" height={40} width={40} />
+              <Image
+                priority
+                className="rounded-lg"
+                src="/avatar-image.jpg"
+                alt=""
+                height={32}
+                width={32}
+              />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
@@ -99,7 +106,14 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Image priority src="/logo.jpg" alt="" height={40} width={40} />
+                <Image
+                  priority
+                  className="rounded-lg"
+                  src="/avatar-image.jpg"
+                  alt=""
+                  height={32}
+                  width={32}
+                />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
