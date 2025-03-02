@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   Check,
   ChevronsUpDown,
@@ -30,9 +31,7 @@ import {
   SidebarMenuItem,
   useSidebar
 } from "~/components/ui/sidebar";
-import { getUserInitials } from "~/lib/utils";
 import { SessionUser } from "~/types/user";
-import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 
 interface UserProfileMenuButtonProps {
   user: SessionUser;
@@ -54,15 +53,7 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={user.image ?? undefined}
-                  alt={user.name ?? user.email}
-                />
-                <AvatarFallback className="bg-background">
-                  {getUserInitials(user.name, user.email)}
-                </AvatarFallback>
-              </Avatar>
+              <Image priority src="/logo.jpg" alt="" height={40} width={40} />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
@@ -78,15 +69,7 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 bg-background">
-                  <AvatarImage
-                    src={user.image ?? undefined}
-                    alt={user.name ?? user.email}
-                  />
-                  <AvatarFallback className="rounded-lg">
-                    {getUserInitials(user.name, user.email)}
-                  </AvatarFallback>
-                </Avatar>
+                <Image priority src="/logo.jpg" alt="" height={40} width={40} />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
