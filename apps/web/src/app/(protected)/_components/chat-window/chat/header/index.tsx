@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import { DeleteChatAlertDialog } from "~/components/chat-dialogs/delete-chat-dialog";
-import { RenameChatDialog } from "~/components/chat-dialogs/rename-chat-dialog";
+import {
+  DeleteChatAlertDialog,
+  RenameChatDialog
+} from "~/components/chat-dialogs";
 import { Button } from "~/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "~/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "~/components/ui/dropdown-menu";
+import { Separator } from "~/components/ui/separator";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 
 interface ChatHeaderProps {
   id: string;
@@ -20,43 +23,49 @@ interface ChatHeaderProps {
 export const ChatHeader = (props: ChatHeaderProps) => {
   const { id, name } = props;
 
-  const [isOpen, setIsOpen] = useState(false);
   const [openedDialog, setOpenDialog] = useState<"rename" | "delete">();
 
+  const closeDialog = () => {
+    setOpenDialog(undefined);
+  };
+
   return (
-    <div className="sticky top-0 right-0 left-0 z-10 flex h-16 w-full items-center justify-between border-b border-gray-200 bg-background pr-4 pl-12">
-      <div className="flex items-center space-x-4">
-        <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost">
-                {name}
-                <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DialogTrigger asChild onClick={() => setOpenDialog("rename")}>
-                <DropdownMenuItem>Rename</DropdownMenuItem>
-              </DialogTrigger>
-              <DialogTrigger asChild onClick={() => setOpenDialog("delete")}>
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-              </DialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DialogContent className="sm:max-w-[450px]">
-            {openedDialog === "rename" && (
-              <RenameChatDialog
-                chatId={id}
-                chatName={name}
-                onSubmitSuccess={() => {
-                  setIsOpen(false);
-                }}
-              />
-            )}
-            {openedDialog === "delete" && <DeleteChatAlertDialog chatId={id} />}
-          </DialogContent>
-        </Dialog>
+    <header className="sticky inset-x-0 top-0 z-10 flex shrink-0 items-center border-b bg-background">
+      <div className="flex h-14 w-full items-center gap-2 px-2">
+        <SidebarTrigger />
+        <Separator
+          orientation="vertical"
+          className="mr-2 data-[orientation=vertical]:h-6"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm">
+              {name}
+              <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => setOpenDialog("rename")}>
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setOpenDialog("delete")}>
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <RenameChatDialog
+          open={openedDialog === "rename"}
+          onOpenChange={closeDialog}
+          chatId={id}
+          chatName={name}
+          onSubmitSuccess={closeDialog}
+        />
+        <DeleteChatAlertDialog
+          open={openedDialog === "delete"}
+          onOpenChange={closeDialog}
+          chatId={id}
+        />
       </div>
-    </div>
+    </header>
   );
 };

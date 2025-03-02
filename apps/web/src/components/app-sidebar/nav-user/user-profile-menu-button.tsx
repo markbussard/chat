@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   Check,
   ChevronsUpDown,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { toast } from "sonner";
 
 import {
   DropdownMenu,
@@ -30,9 +32,10 @@ import {
   SidebarMenuItem,
   useSidebar
 } from "~/components/ui/sidebar";
-import { getUserInitials } from "~/lib/utils";
+import { META_THEME_COLORS } from "~/constants";
+import { useMetaThemeColor } from "~/hooks/use-meta-theme-color";
+import { parseError } from "~/lib/utils";
 import { SessionUser } from "~/types/user";
-import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 
 interface UserProfileMenuButtonProps {
   user: SessionUser;
@@ -44,6 +47,32 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
   const { isMobile } = useSidebar();
 
   const { theme, setTheme } = useTheme();
+  const { setMetaThemeColor } = useMetaThemeColor();
+
+  const toggleTheme = (value: "dark" | "light" | "system") => {
+    setTheme(value);
+    if (value === "light") {
+      setMetaThemeColor(META_THEME_COLORS.LIGHT);
+    } else if (value === "dark") {
+      setMetaThemeColor(META_THEME_COLORS.DARK);
+    } else if (value === "system") {
+      // For system theme, check the preferred color scheme
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "DARK"
+        : "LIGHT";
+      setMetaThemeColor(META_THEME_COLORS[systemTheme]);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirectTo: "/login" });
+    } catch (error) {
+      const { message } = parseError(error);
+      toast.error(message);
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -54,15 +83,14 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={user.image ?? undefined}
-                  alt={user.name ?? user.email}
-                />
-                <AvatarFallback className="bg-background">
-                  {getUserInitials(user.name, user.email)}
-                </AvatarFallback>
-              </Avatar>
+              <Image
+                priority
+                className="rounded-lg"
+                src="/avatar-image.jpg"
+                alt=""
+                height={32}
+                width={32}
+              />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
@@ -78,15 +106,14 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 bg-background">
-                  <AvatarImage
-                    src={user.image ?? undefined}
-                    alt={user.name ?? user.email}
-                  />
-                  <AvatarFallback className="rounded-lg">
-                    {getUserInitials(user.name, user.email)}
-                  </AvatarFallback>
-                </Avatar>
+                <Image
+                  priority
+                  className="rounded-lg"
+                  src="/avatar-image.jpg"
+                  alt=""
+                  height={32}
+                  width={32}
+                />
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{user.name}</span>
                   <span className="truncate text-xs">{user.email}</span>
@@ -95,27 +122,24 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                {/* <Settings /> */}
-                Settings
-              </DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   <span>Appearance</span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    <DropdownMenuItem onClick={() => setTheme("system")}>
+                    <DropdownMenuItem onClick={() => toggleTheme("system")}>
                       <MonitorCheck />
                       <span>System</span>
                       {theme === "system" && <Check className="ml-auto" />}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("light")}>
+                    <DropdownMenuItem onClick={() => toggleTheme("light")}>
                       <Sun />
                       <span>Light</span>
                       {theme === "light" && <Check className="ml-auto" />}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    <DropdownMenuItem onClick={() => toggleTheme("dark")}>
                       <Moon />
                       <span>Dark</span>
                       {theme === "dark" && <Check className="ml-auto" />}
@@ -125,11 +149,7 @@ export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
               </DropdownMenuSub>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                signOut({ redirectTo: "/login" });
-              }}
-            >
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

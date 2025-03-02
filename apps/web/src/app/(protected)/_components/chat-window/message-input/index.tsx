@@ -40,10 +40,15 @@ export const MessageInput = (props: MessageInputProps) => {
   }, []);
 
   return (
-    <div className="w-full max-w-2xl">
+    <div
+      className="w-full max-w-3xl cursor-text"
+      onClick={() => {
+        inputRef.current?.focus();
+      }}
+    >
       <div className="flex h-full w-full min-w-0 flex-col">
         <form
-          className="relative flex h-full min-h-0 w-full rounded-md border border-input transition-shadow focus-within:border-gray-600 dark:border-alpha-400 dark:focus-within:border-alpha-600"
+          className="relative flex h-full min-h-0 w-full rounded-3xl border border-input transition-shadow focus-within:border-gray-600 dark:border-alpha-400 dark:focus-within:border-alpha-600"
           onSubmit={(e) => {
             e.preventDefault();
             sendMessage(currentMessage);
@@ -60,8 +65,8 @@ export const MessageInput = (props: MessageInputProps) => {
               <Textarea
                 ref={inputRef}
                 autoFocus
-                className="max-h-[96px] min-h-[2.5rem] w-full resize-none overflow-y-auto border-[0px] border-transparent px-2 ring-0 shadow-none outline-0 focus-visible:ring-0"
-                placeholder="Ask anything..."
+                className="max-h-[96px] min-h-[4.5rem] w-full resize-none overflow-y-auto border-[0px] border-transparent px-2 ring-0 shadow-none outline-0 focus-visible:ring-0"
+                placeholder="Ask anything"
                 value={currentMessage}
                 onChange={(e) => {
                   setCurrentMessage(e.target.value);
@@ -84,7 +89,7 @@ export const MessageInput = (props: MessageInputProps) => {
                   size="icon"
                   className="h-8 w-8 rounded-3xl"
                 >
-                  <ArrowUp className="size-5!" />
+                  <ArrowUp className="size-5" />
                 </Button>
               </div>
             </div>

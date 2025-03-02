@@ -5,7 +5,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger
 } from "~/components/ui/dropdown-menu";
 import {
@@ -31,8 +30,7 @@ export const Focus = (props: FocusProps) => {
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="ml-[-4px] px-1.5">
-                {/* className="flex gap-2" */}
+              <Button variant="ghost" size="sm" className="ml-[-10px]">
                 <ListFilter />
                 Focus
                 <ChevronDown />
