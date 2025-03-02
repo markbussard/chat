@@ -18,9 +18,6 @@ export default async function ProtectedLayout(props: ProtectedLayoutProps) {
   return (
     <SidebarProvider defaultOpen={sidebarDefaultOpen}>
       <AppSidebar />
-      <div className="absolute top-4 left-4 z-1">
-        <SidebarTrigger />
-      </div>
       <div className="relative flex h-screen max-w-full flex-1 flex-col overflow-hidden">
         <main className="relative h-full w-full flex-1 overflow-auto">
           <div className="flex h-full flex-col">{props.children}</div>
