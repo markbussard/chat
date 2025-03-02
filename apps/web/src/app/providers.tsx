@@ -9,7 +9,12 @@ type ProvidersProps = Readonly<{
 
 export function Providers(props: ProvidersProps) {
   return (
-    <ThemeProvider defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       {props.children}
       <Toaster />
     </ThemeProvider>
