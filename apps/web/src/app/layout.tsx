@@ -3,6 +3,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono as FontMono, Inter as FontSans } from "next/font/google";
 
+import { META_THEME_COLORS } from "~/constants";
 import { cn } from "~/lib/utils";
 import { Providers } from "./providers";
 
@@ -15,11 +16,6 @@ const fontMono = FontMono({
   subsets: ["latin"],
   variable: "--font-mono"
 });
-
-const META_THEME_COLORS = {
-  LIGHT: "#ffffff",
-  DARK: "#09090b"
-} as const;
 
 export const metadata: Metadata = {
   title: "Chat"
