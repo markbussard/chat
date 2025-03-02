@@ -7,6 +7,7 @@ import { z } from "zod";
 import { prisma } from "@repo/db";
 
 import { verifyUser } from "~/lib/dal";
+import { UpdateChatNameDTO } from "~/schemas/chat";
 
 export async function createChat(message: string) {
   const user = await verifyUser();
@@ -52,10 +53,10 @@ const updateChatNameSchema = z.object({
     .max(255, "Name must be less than 255 characters")
 });
 
-export async function updateChatName(formData: FormData) {
+export async function updateChatName(payload: UpdateChatNameDTO) {
   const user = await verifyUser();
 
-  const validatedFields = updateChatNameSchema.safeParse(formData);
+  const validatedFields = updateChatNameSchema.safeParse(payload);
 
   if (!validatedFields.success) {
     return {
