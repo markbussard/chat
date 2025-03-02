@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { createChat } from "~/app/actions/chat";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 import { ChatFocusMode } from "~/types/chat";
 import { MessageInput } from "../message-input";
 import { Suggestions } from "./suggestions";
@@ -34,6 +35,9 @@ export const DashboardView = () => {
 
   return (
     <div className="mx-auto flex h-full w-full max-w-7xl flex-col items-center gap-6 pt-20 pb-20">
+      <div className="absolute top-[14px] left-2 z-1">
+        <SidebarTrigger />
+      </div>
       <h1 className="text-3xl font-semibold">How can I help you?</h1>
       <MessageInput
         sendMessage={handleCreateNewChat}

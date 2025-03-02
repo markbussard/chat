@@ -21,12 +21,11 @@ import { RecentChats, RecentChatsSkeleton } from "./recent-chats";
 export async function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarHeader className="px-4 py-3">
-        <div className="flex justify-between">
+      <SidebarHeader className="px-4 py-4">
+        <div className="flex">
           <div className="flex aspect-square items-center justify-center rounded-lg">
             <Bot className="size-6" />
           </div>
-          <SidebarTrigger />
         </div>
       </SidebarHeader>
       <SidebarGroup>

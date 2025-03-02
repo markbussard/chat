@@ -11,6 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "~/components/ui/dropdown-menu";
+import { Separator } from "~/components/ui/separator";
+import { SidebarTrigger } from "~/components/ui/sidebar";
 
 interface ChatHeaderProps {
   id: string;
@@ -24,8 +26,13 @@ export const ChatHeader = (props: ChatHeaderProps) => {
   const [openedDialog, setOpenDialog] = useState<"rename" | "delete">();
 
   return (
-    <div className="sticky top-0 right-0 left-0 z-10 flex h-16 w-full items-center justify-between border-b border-gray-200 bg-background pr-4 pl-12">
-      <div className="flex items-center space-x-4">
+    <header className="sticky inset-x-0 z-10 flex shrink-0 items-center border-b bg-background">
+      <div className="flex h-14 w-full items-center gap-2 px-2">
+        <SidebarTrigger />
+        <Separator
+          orientation="vertical"
+          className="mr-2 data-[orientation=vertical]:h-6"
+        />
         <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
@@ -57,6 +64,6 @@ export const ChatHeader = (props: ChatHeaderProps) => {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </header>
   );
 };
