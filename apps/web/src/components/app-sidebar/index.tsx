@@ -12,8 +12,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarTrigger
+  SidebarMenuItem
 } from "~/components/ui/sidebar";
 import { NavUser } from "./nav-user";
 import { RecentChats, RecentChatsSkeleton } from "./recent-chats";
