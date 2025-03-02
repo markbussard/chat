@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
 
@@ -108,7 +107,7 @@ function SheetTitle({
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn("font-semibold tracking-tight text-foreground", className)}
+      className={cn("font-semibold text-foreground", className)}
       {...props}
     />
   );
