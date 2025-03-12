@@ -1,6 +1,7 @@
 import { IncomingMessage } from "http";
 import { WebSocket } from "ws";
 
+import { createOpenSignalMessage } from "~/utils/messages";
 import { handleMessage } from "./message-handler";
 
 export async function handleConnection(
@@ -11,12 +12,8 @@ export async function handleConnection(
     const authToken = request.headers["cookie"];
     const interval = setInterval(() => {
       if (ws.readyState === ws.OPEN) {
-        ws.send(
-          JSON.stringify({
-            type: "signal",
-            data: "open"
-          })
-        );
+        ws.send(createOpenSignalMessage());
+        console.debug("Web Socket connection established");
         clearInterval(interval);
       }
     }, 5);
