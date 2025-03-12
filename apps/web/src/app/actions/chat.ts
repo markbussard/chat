@@ -9,7 +9,17 @@ import { prisma } from "@repo/db";
 import { verifyUser } from "~/lib/dal";
 import { UpdateChatNameDTO } from "~/schemas/chat";
 
-export async function createChat(message: string) {
+type CreateChatResponse =
+  | {
+      success: true;
+      chatId: string;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+export async function createChat(message: string): Promise<CreateChatResponse> {
   const user = await verifyUser();
 
   try {
@@ -40,7 +50,8 @@ export async function createChat(message: string) {
   } catch (error) {
     console.error("Error creating chat:", error);
     return {
-      success: false
+      success: false,
+      error: "Failed to create chat"
     };
   }
 }
