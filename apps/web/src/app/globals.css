@@ -202,14 +202,14 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-@layer base {
+@layer components {
   button,
   [role="button"] {
     cursor: pointer;
   }
 
   ::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
   }
 
   ::-webkit-scrollbar-track {
@@ -218,7 +218,7 @@
 
   ::-webkit-scrollbar-thumb {
     background: var(--border);
-    border-radius: 5px;
+    border-radius: 6px;
   }
 
   * {
@@ -231,6 +231,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
