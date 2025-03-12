@@ -22,22 +22,26 @@ function handleEmitterEvents(
   let receivedMessage = "";
 
   emitter.on("data", (data) => {
-    const parsedData = safeParseMessageJSON(data);
-    if (parsedData.content) {
-      receivedMessage += parsedData.content;
+    console.log("Received data:", data);
+    if (data.content) {
+      receivedMessage += data.content;
       const contentMessage = createContentMessage(
         chatId,
         messageId,
-        parsedData.content
+        data.content
       );
       ws.send(contentMessage);
     }
   });
 
-  emitter.on("end", () => {
-    const endMessage = createEndMessage(chatId, messageId);
+  emitter.on("end", async () => {
+    const endMessage = createEndMessage(
+      chatId,
+      "randomMessageId",
+      receivedMessage
+    );
     ws.send(endMessage);
-    prisma.message.upsert({
+    await prisma.message.upsert({
       create: {
         text: receivedMessage,
         chat: {
@@ -45,7 +49,6 @@ function handleEmitterEvents(
             id: chatId
           }
         },
-        id: messageId,
         sender: "ASSISTANT"
       },
       update: {
@@ -88,10 +91,10 @@ export async function handleMessage(message: string, ws: WebSocket) {
     );
   }
 
-  const messageData = validatedMessage.data.message;
+  const messageData = validatedMessage.data;
 
   let assistantMessageId = messageData.messageId;
-
+  console.log("assistantMessageId", assistantMessageId);
   try {
     const eventEmitter = await createOpenAIStream(messageData.content);
 

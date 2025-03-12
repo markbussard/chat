@@ -33,23 +33,28 @@ export function createContentMessage(
   return JSON.stringify(message);
 }
 
-export function createEndMessage(chatId: string, messageId: string) {
+export function createEndMessage(
+  chatId: string,
+  messageId: string,
+  content: string
+) {
   const message = {
     type: "end",
     data: {
       chatId,
-      messageId
+      messageId,
+      content
     }
   } satisfies EndMessage;
   return JSON.stringify(message);
 }
 
-export function createErrorMessage(code: ErrorMessageCode, message: string) {
+export function createErrorMessage(chatId: string, error: string) {
   const errorMessage = {
     type: "error",
     data: {
-      code,
-      message
+      chatId,
+      error
     }
   } satisfies ErrorMessage;
   return JSON.stringify(errorMessage);

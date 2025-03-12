@@ -1,7 +1,8 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
-import { Toaster } from "sonner";
+
+import { Toaster } from "~/components/ui/sonner";
 
 type ProvidersProps = Readonly<{
   children: React.ReactNode;

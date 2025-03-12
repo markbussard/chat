@@ -4,7 +4,7 @@ import express from "express";
 import helmet from "helmet";
 
 import { PORT } from "./env";
-import { startWebSocketServer } from "./web-socket";
+import { startWebSocketServer } from "./websocket";
 
 const app = express();
 const server = http.createServer(app);

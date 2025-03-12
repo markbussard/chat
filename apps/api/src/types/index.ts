@@ -30,14 +30,15 @@ export interface EndMessage {
   data: {
     chatId: string;
     messageId: string;
+    content: string;
   };
 }
 
 export interface ErrorMessage {
   type: "error";
   data: {
-    code: ErrorMessageCode;
-    message: string;
+    chatId: string;
+    error: string;
   };
 }
 
