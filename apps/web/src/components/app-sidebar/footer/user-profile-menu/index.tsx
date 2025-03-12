@@ -41,7 +41,7 @@ interface UserProfileMenuButtonProps {
   user: SessionUser;
 }
 
-export function UserProfileMenuButton(props: UserProfileMenuButtonProps) {
+export function UserProfileMenu(props: UserProfileMenuButtonProps) {
   const { user } = props;
 
   const { isMobile } = useSidebar();
