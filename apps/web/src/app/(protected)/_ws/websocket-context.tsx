@@ -11,6 +11,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { ChatConversationHistoryMessage } from "~/types/chat";
 import { useMessageStore } from "./message-store";
 import { WebSocketMessage } from "./types";
 
@@ -19,10 +20,14 @@ interface WebSocketContextValue {
   isError: boolean;
   sendMessage: ({
     chatId,
-    message
+    message,
+    messageId,
+    history
   }: {
     chatId: string;
     message: string;
+    messageId: string;
+    history: ChatConversationHistoryMessage[];
   }) => void;
 }
 
@@ -44,11 +49,11 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  const { startStream, updateStream, endStream } = useMessageStore();
+  const updateStream = useMessageStore((state) => state.updateStream);
+  const endStream = useMessageStore((state) => state.endStream);
 
   useEffect(() => {
     function connectWs() {
-      console.log("Connecting to WebSocket...");
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.close();
       }
@@ -64,7 +69,6 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
       ws.addEventListener("message", (event: MessageEvent<string>) => {
         const wsMessage = JSON.parse(event.data) as WebSocketMessage;
-
         if (wsMessage.type === "signal" && wsMessage.data.message === "open") {
           const interval = setInterval(() => {
             if (ws.readyState === WebSocket.OPEN) {
@@ -83,16 +87,12 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           console.debug(new Date(), "ws:connected");
         } else {
           const { type, data } = wsMessage;
-          console.log("Received message:", type, data);
           switch (type) {
-            case "start":
-              startStream(data.chatId, data.messageId);
-              break;
             case "content":
               updateStream(data.chatId, data.content);
               break;
             case "end":
-              updateStream(data.chatId, data.content, true);
+              updateStream(data.chatId, data.content, data.messageId, true);
               break;
             case "error":
               toast.error(data.error);
@@ -163,12 +163,14 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const sendMessage = useCallback(
-    (payload: { chatId: string; message: string }) => {
+    (payload: {
+      chatId: string;
+      message: string;
+      messageId: string;
+      history: ChatConversationHistoryMessage[];
+    }) => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        const message = JSON.stringify({
-          chatId: payload.chatId,
-          content: payload.message
-        });
+        const message = JSON.stringify(payload);
         wsRef.current.send(message);
       }
     },

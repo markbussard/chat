@@ -6,7 +6,6 @@ import { DashboardView } from "./dashboard-view";
 
 interface ChatWindowProps {
   chat?: ChatConversation;
-  userName: string | null;
 }
 
 export const ChatWindow = (props: ChatWindowProps) => {

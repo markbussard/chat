@@ -7,12 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "~/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { ChatFocusMode } from "~/types/chat";
 
@@ -26,20 +20,13 @@ export const Focus = (props: FocusProps) => {
 
   return (
     <DropdownMenu>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="ml-[-10px]">
-                <ListFilter />
-                Focus
-                <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-          </TooltipTrigger>
-          <TooltipContent>Set a focus for your sources</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="ml-[-12px]">
+          <ListFilter />
+          Focus
+          <ChevronDown />
+        </Button>
+      </DropdownMenuTrigger>
       <DropdownMenuContent className="flex w-96 gap-2">
         <DropdownMenuItem
           className="flex w-1/2 cursor-pointer flex-col items-start"

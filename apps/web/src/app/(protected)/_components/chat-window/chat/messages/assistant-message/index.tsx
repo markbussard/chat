@@ -1,4 +1,8 @@
+import { memo } from "react";
+
 import { ChatConversationMessage } from "~/types/chat";
+import { MarkdownRenderer, MessageLayout } from "../common";
+import { AssistantMessageActions } from "./actions";
 
 interface AssistantMessageProps {
   message: ChatConversationMessage;
@@ -6,14 +10,19 @@ interface AssistantMessageProps {
   onRegenerateMessage: (messageId: string) => void;
 }
 
-export const AssistantMessage = (props: AssistantMessageProps) => {
+export const AssistantMessage = memo((props: AssistantMessageProps) => {
   const { message, isLastMessage, onRegenerateMessage } = props;
 
   return (
-    <article className="flex flex-col gap-2 py-4">
-      <div className="mb-2 flex items-center gap-4">
-        <div className="w-fit">{message.text}</div>
-      </div>
-    </article>
+    <MessageLayout sender="ASSISTANT">
+      <MarkdownRenderer message={message.text} />
+      <AssistantMessageActions
+        message={message}
+        isLastMessage={isLastMessage}
+        onRegenerateMessage={onRegenerateMessage}
+      />
+    </MessageLayout>
   );
-};
+});
+
+AssistantMessage.displayName = "AssistantMessage";

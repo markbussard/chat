@@ -1,16 +1,21 @@
 import { create } from "zustand";
 
 export interface StreamingMessage {
-  id: string;
+  messageId?: string;
   content: string;
   isComplete: boolean;
   timestamp: number;
 }
 
 export interface MessageStore {
-  activeStreams: Record<string, StreamingMessage>; // Indexed by chatId
-  updateStream: (chatId: string, content: string, isComplete?: boolean) => void;
-  startStream: (chatId: string, messageId: string) => void;
+  activeStreams: Record<string, StreamingMessage>;
+  updateStream: (
+    chatId: string,
+    content: string,
+    assistantMessageId?: string,
+    isComplete?: boolean
+  ) => void;
+  startStream: (chatId: string, content: string) => void;
   endStream: (chatId: string) => void;
   getActiveStream: (chatId: string) => StreamingMessage | null;
 }
@@ -18,30 +23,41 @@ export interface MessageStore {
 export const useMessageStore = create<MessageStore>((set, get) => ({
   activeStreams: {},
 
-  startStream: (chatId, messageId) =>
+  startStream: (chatId, content) =>
     set((state) => ({
       activeStreams: {
         ...state.activeStreams,
         [chatId]: {
-          id: messageId,
-          chatId,
-          content: "",
+          content,
           isComplete: false,
           timestamp: Date.now()
         }
       }
     })),
 
-  updateStream: (chatId, content, isComplete = false) =>
+  updateStream: (chatId, content, assistantMessageId, isComplete = false) =>
     set((state) => {
       const currentStream = state.activeStreams[chatId];
-      if (!currentStream) return state;
+
+      if (!currentStream) {
+        return {
+          activeStreams: {
+            ...state.activeStreams,
+            [chatId]: {
+              content,
+              isComplete,
+              timestamp: Date.now()
+            }
+          }
+        };
+      }
 
       return {
         activeStreams: {
           ...state.activeStreams,
           [chatId]: {
             ...currentStream,
+            messageId: assistantMessageId,
             content: isComplete ? content : currentStream.content + content,
             isComplete
           }
@@ -51,7 +67,6 @@ export const useMessageStore = create<MessageStore>((set, get) => ({
 
   endStream: (chatId) =>
     set((state) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [chatId]: removed, ...remaining } = state.activeStreams;
       return { activeStreams: remaining };
     }),
