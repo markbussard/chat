@@ -68,7 +68,6 @@ export const RenameChatDialog = (props: RenameChatDialogProps) => {
     }
   };
 
-  console.log(form.formState.errors);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild />

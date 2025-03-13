@@ -27,5 +27,5 @@ export default async function ChatPage(props: ChatPageProps) {
   const { id } = await props.params;
   const chat = await getChatById(id, user.id);
 
-  return <ChatWindow chat={chat} userName={user.name ?? user.email} />;
+  return <ChatWindow chat={chat} />;
 }

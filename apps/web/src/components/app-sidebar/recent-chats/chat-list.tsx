@@ -30,6 +30,11 @@ export const RecentChatList = (props: RecentChatListProps) => {
               <Link
                 href={href}
                 style={{ color: "inherit", textDecoration: "inherit" }}
+                onClick={(e) => {
+                  if (isActive) {
+                    e.preventDefault();
+                  }
+                }}
               >
                 <div className="truncate overflow-hidden text-ellipsis">
                   {chat.name}

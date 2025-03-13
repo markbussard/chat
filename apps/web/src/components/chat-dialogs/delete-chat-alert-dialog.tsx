@@ -12,7 +12,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "~/components/ui/alert-dialog";
-import { parseError } from "~/lib/utils";
 
 interface DeleteChatDialogProps {
   open: boolean;
@@ -24,19 +23,13 @@ export const DeleteChatAlertDialog = (props: DeleteChatDialogProps) => {
   const { open, onOpenChange, chatId } = props;
 
   const handleConfirmDelete = async () => {
-    try {
-      const response = await deleteChat(chatId);
+    const response = await deleteChat(chatId);
 
-      if (!response.success) {
-        throw new Error(
-          "An error occurred while deleting this chat. Please try again."
-        );
-      }
-    } catch (error) {
-      const { message } = parseError(error);
-      toast.error(message);
+    if (!response.success) {
+      toast.error(response.error);
     }
   };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogTrigger asChild />

@@ -13,7 +13,7 @@ export const AttachFiles = () => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" className="size-8">
             <Paperclip />
           </Button>
         </TooltipTrigger>

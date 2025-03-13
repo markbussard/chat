@@ -23,7 +23,7 @@ export async function getChatById(
       updatedAt: true,
       messages: {
         select: {
-          id: true,
+          messageId: true,
           text: true,
           sender: true,
           updatedAt: true

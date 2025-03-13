@@ -1,4 +1,4 @@
-import { Chat, Message } from "@repo/db";
+import { Chat, Message, MessageSender } from "@repo/db";
 
 export type ChatConversation = Pick<
   Chat,
@@ -7,7 +7,7 @@ export type ChatConversation = Pick<
 
 export type ChatConversationMessage = Pick<
   Message,
-  "id" | "text" | "sender" | "updatedAt"
+  "messageId" | "text" | "sender" | "updatedAt"
 >;
 
 export type RecentChatListItem = Pick<Chat, "id" | "name" | "updatedAt">;
@@ -16,3 +16,5 @@ export enum ChatFocusMode {
   WEB_SEARCH = "WEB_SEARCH",
   ACADEMIC_SEARCH = "ACADEMIC_SEARCH"
 }
+
+export type ChatConversationHistoryMessage = [MessageSender, string];

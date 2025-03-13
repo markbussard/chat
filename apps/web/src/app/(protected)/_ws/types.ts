@@ -5,15 +5,6 @@ export interface WebSocketSignalMessage {
   };
 }
 
-export interface WebSocketStartMessage {
-  type: "start";
-  data: {
-    chatId: string;
-    messageId: string;
-    content: string;
-  };
-}
-
 export interface WebSocketContentMessage {
   type: "content";
   data: {
@@ -41,7 +32,6 @@ export interface WebSocketErrorMessage {
 
 export type WebSocketMessage =
   | WebSocketSignalMessage
-  | WebSocketStartMessage
   | WebSocketContentMessage
   | WebSocketEndMessage
   | WebSocketErrorMessage;

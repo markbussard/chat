@@ -3,18 +3,25 @@ import { ArrowUp } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
+import { cn } from "~/lib/utils";
 import { ChatFocusMode } from "~/types/chat";
 import { AttachFiles } from "./attach-files";
 import { Focus } from "./focus";
 
 interface MessageInputProps {
+  isChatPage?: boolean;
   sendMessage: (message: string) => Promise<void>;
   focusMode: ChatFocusMode;
   onFocusModeChange: (focusMode: ChatFocusMode) => void;
 }
 
 export const MessageInput = (props: MessageInputProps) => {
-  const { sendMessage, focusMode, onFocusModeChange } = props;
+  const {
+    isChatPage = false,
+    sendMessage,
+    focusMode,
+    onFocusModeChange
+  } = props;
 
   const [currentMessage, setCurrentMessage] = useState("");
 
@@ -40,62 +47,65 @@ export const MessageInput = (props: MessageInputProps) => {
   }, []);
 
   return (
-    <div
-      className="w-full max-w-3xl cursor-text"
-      onClick={() => {
-        inputRef.current?.focus();
-      }}
-    >
-      <div className="flex h-full w-full min-w-0 flex-col">
-        <form
-          className="relative flex h-full min-h-0 w-full rounded-3xl border border-input transition-shadow focus-within:border-gray-600 dark:border-alpha-400 dark:focus-within:border-alpha-600"
-          onSubmit={(e) => {
+    <div className="w-full max-w-3xl" onClick={() => inputRef.current?.focus()}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          sendMessage(currentMessage);
+          setCurrentMessage("");
+        }}
+        onPaste={(e) => {
+          const clipboardData = e.clipboardData;
+          const pastedData = clipboardData.getData("text/plain");
+          setCurrentMessage((prev) => prev + pastedData.trim());
+          e.preventDefault();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey && !!currentMessage.trim()) {
             e.preventDefault();
             sendMessage(currentMessage);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey && !!currentMessage.trim()) {
-              e.preventDefault();
-              sendMessage(currentMessage);
-            }
-          }}
-        >
-          <div className="flex w-full min-w-full flex-col gap-2 px-3 py-2">
-            <div className="flex-1 overflow-hidden">
-              <Textarea
-                ref={inputRef}
-                autoFocus
-                className="max-h-[96px] min-h-[4.5rem] w-full resize-none overflow-y-auto border-[0px] border-transparent px-2 ring-0 shadow-none outline-0 focus-visible:ring-0"
-                placeholder="Ask anything"
-                value={currentMessage}
-                onChange={(e) => {
-                  setCurrentMessage(e.target.value);
+            setCurrentMessage("");
+          }
+        }}
+      >
+        <div className="relative flex w-full max-w-3xl min-w-full flex-grow cursor-text flex-col gap-2 rounded-3xl border border-input bg-transparent px-3 py-2 transition-shadow focus-within:border-gray-600 dark:border-alpha-400 dark:bg-zinc-900 dark:focus-within:border-alpha-600">
+          <div className="flex-1 overflow-hidden">
+            <Textarea
+              ref={inputRef}
+              autoFocus
+              className={cn(
+                "max-h-60 w-full resize-none overflow-y-auto border-[0px] border-transparent px-2 ring-0 shadow-none outline-0 placeholder:text-muted-foreground focus-visible:ring-0",
+                isChatPage ? "min-h-12" : "min-h-16"
+              )}
+              placeholder="Ask anything..."
+              value={currentMessage}
+              onChange={(e) => {
+                setCurrentMessage(e.target.value);
 
-                  e.target.style.height = "auto";
-                  e.target.style.height = `${Math.min(e.target.scrollHeight, 96)}px`;
-                }}
-                rows={1}
-              />
+                e.target.style.height = "auto";
+                e.target.style.height = `${Math.min(e.target.scrollHeight, 240)}px`;
+              }}
+              rows={1}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="mx-2 flex items-center">
+              <Focus focusMode={focusMode} onChange={onFocusModeChange} />
             </div>
-            <div className="flex items-center justify-between">
-              <div className="mx-2 flex items-center">
-                <Focus focusMode={focusMode} onChange={onFocusModeChange} />
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <AttachFiles />
-                <Button
-                  disabled={!currentMessage.trim()}
-                  type="submit"
-                  size="icon"
-                  className="h-8 w-8 rounded-3xl"
-                >
-                  <ArrowUp className="size-5" />
-                </Button>
-              </div>
+            <div className="flex items-center justify-center gap-2">
+              <AttachFiles />
+              <Button
+                disabled={!currentMessage.trim()}
+                type="submit"
+                size="icon"
+                className="h-8 w-8 rounded-3xl"
+              >
+                <ArrowUp className="size-5" />
+              </Button>
             </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 };
