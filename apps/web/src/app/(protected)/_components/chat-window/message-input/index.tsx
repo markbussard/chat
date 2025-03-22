@@ -68,13 +68,13 @@ export const MessageInput = (props: MessageInputProps) => {
           }
         }}
       >
-        <div className="relative flex w-full max-w-3xl min-w-full flex-grow cursor-text flex-col gap-2 rounded-3xl border border-input bg-transparent px-3 py-2 transition-shadow focus-within:border-gray-600 dark:border-alpha-400 dark:bg-zinc-900 dark:focus-within:border-alpha-600">
+        <div className="relative flex w-full max-w-3xl min-w-full flex-grow cursor-text flex-col gap-2 rounded-3xl border border-input bg-transparent px-3 py-2 transition-shadow focus-within:border-gray-600 dark:border-alpha-400 dark:bg-input/30 dark:focus-within:border-alpha-600">
           <div className="flex-1 overflow-hidden">
             <Textarea
               ref={inputRef}
               autoFocus
               className={cn(
-                "max-h-60 w-full resize-none overflow-y-auto border-[0px] border-transparent px-2 ring-0 shadow-none outline-0 placeholder:text-muted-foreground focus-visible:ring-0",
+                "max-h-60 w-full resize-none overflow-y-auto border-[0px] border-transparent px-2 ring-0 shadow-none outline-0 placeholder:text-muted-foreground focus-visible:ring-0 dark:bg-transparent",
                 isChatPage ? "min-h-12" : "min-h-16"
               )}
               placeholder="Ask anything..."

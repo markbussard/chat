@@ -8,9 +8,9 @@ export function ScrollToBottom() {
 
   return (
     !isAtBottom && (
-      <div>
+      <div className="relative">
         <Button
-          className="relative z-30 mb-4 size-7 rounded-full"
+          className="absolute right-[50%] bottom-6 z-30 size-6 rounded-full"
           onClick={() => scrollToBottom()}
         >
           <ArrowDown className="size-[18px]" />

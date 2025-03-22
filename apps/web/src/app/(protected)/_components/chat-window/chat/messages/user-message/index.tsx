@@ -11,7 +11,7 @@ export const UserMessage = memo((props: UserMessageProps) => {
 
   return (
     <article className="flex justify-end py-4">
-      <div className="max-w-[70%] rounded-2xl bg-zinc-800 px-4 py-3 text-white">
+      <div className="max-w-[70%] rounded-2xl bg-muted px-4 py-3 text-white">
         {message.text}
       </div>
     </article>
