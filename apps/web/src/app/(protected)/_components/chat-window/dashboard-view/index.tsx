@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
+import { MessageSender } from "@repo/db";
+
+import { useWebSocket } from "~/app/(protected)/_ws";
 import { createChat } from "~/app/actions/chat";
 import { SidebarTrigger } from "~/components/ui/sidebar";
-import { ChatFocusMode } from "~/types/chat";
+import { ChatConversationHistoryMessage, ChatFocusMode } from "~/types/chat";
 import { MessageInput } from "../message-input";
 import { Suggestions } from "./suggestions";
 
 export const DashboardView = () => {
+  const ws = useWebSocket();
+
   const router = useRouter();
 
   const [chatFocusMode, setChatFocusMode] = useState<ChatFocusMode>(
@@ -19,12 +25,24 @@ export const DashboardView = () => {
     setChatFocusMode(mode);
   };
 
-  const handleCreateNewChat = async (message: string) => {
+  const handleSendMessage = async (message: string) => {
     try {
-      const res = await createChat(message);
+      const res = await createChat();
       if (!res.success) {
-        throw new Error("Error");
+        throw new Error(res.error);
       }
+
+      const messageId = uuidv4();
+      const history: ChatConversationHistoryMessage[] = [
+        [MessageSender.USER, message]
+      ];
+
+      ws.sendMessage({
+        chatId: res.chatId,
+        message,
+        messageId,
+        history
+      });
 
       router.push(`/chat/${res.chatId}`);
     } catch (error) {
@@ -34,13 +52,13 @@ export const DashboardView = () => {
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-7xl flex-col items-center gap-6 pt-20 pb-20">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col items-center justify-center gap-6 overflow-y-auto px-2 py-6">
       <div className="absolute top-[14px] left-2 z-1">
         <SidebarTrigger />
       </div>
       <h1 className="text-3xl font-semibold">How can I help you?</h1>
       <MessageInput
-        sendMessage={handleCreateNewChat}
+        sendMessage={handleSendMessage}
         focusMode={chatFocusMode}
         onFocusModeChange={handleChatFocusModeChange}
       />

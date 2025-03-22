@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { permanentRedirect } from "next/navigation";
+import { permanentRedirect, redirect } from "next/navigation";
 import { z } from "zod";
 
 import { prisma } from "@repo/db";
@@ -19,7 +19,7 @@ type CreateChatResponse =
       error: string;
     };
 
-export async function createChat(message: string): Promise<CreateChatResponse> {
+export async function createChat(): Promise<CreateChatResponse> {
   const user = await verifyUser();
 
   try {
@@ -29,12 +29,6 @@ export async function createChat(message: string): Promise<CreateChatResponse> {
         user: {
           connect: {
             id: user.id
-          }
-        },
-        messages: {
-          create: {
-            text: message,
-            sender: "USER"
           }
         }
       },
@@ -127,31 +121,5 @@ export async function deleteChat(chatId: string) {
     };
   }
 
-  permanentRedirect(`/`);
-}
-
-export async function sendNewChatMessage(chatId: string, message: string) {
-  await verifyUser();
-
-  try {
-    await prisma.message.create({
-      data: {
-        text: message,
-        sender: "USER",
-        chat: {
-          connect: {
-            id: chatId
-          }
-        }
-      }
-    });
-    return {
-      success: true
-    };
-  } catch (error) {
-    console.error("Error sending message:", error);
-    return {
-      success: false
-    };
-  }
+  redirect(`/`);
 }

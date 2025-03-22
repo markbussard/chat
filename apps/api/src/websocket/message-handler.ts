@@ -1,33 +1,31 @@
-import EventEmitter from "events";
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
 import { WebSocket } from "ws";
 
-import { Prisma, prisma } from "@repo/db";
+import { prisma } from "@repo/db";
 
 import { createOpenAIStream } from "~/lib/openai";
 import { ErrorMessageCode } from "~/types";
 import {
   createContentMessage,
   createEndMessage,
-  createErrorMessage,
-  safeParseMessageJSON
+  createErrorMessage
 } from "~/utils/messages";
 import { validateMessage } from "~/utils/validate-message";
 
 function handleEmitterEvents(
   emitter: EventEmitter,
   ws: WebSocket,
-  messageId: string,
+  assistantMessageId: string,
   chatId: string
 ) {
   let receivedMessage = "";
-
   emitter.on("data", (data) => {
-    console.log("Received data:", data);
     if (data.content) {
       receivedMessage += data.content;
       const contentMessage = createContentMessage(
         chatId,
-        messageId,
+        assistantMessageId,
         data.content
       );
       ws.send(contentMessage);
@@ -37,12 +35,13 @@ function handleEmitterEvents(
   emitter.on("end", async () => {
     const endMessage = createEndMessage(
       chatId,
-      "randomMessageId",
+      assistantMessageId,
       receivedMessage
     );
     ws.send(endMessage);
-    await prisma.message.upsert({
-      create: {
+    await prisma.message.create({
+      data: {
+        messageId: assistantMessageId,
         text: receivedMessage,
         chat: {
           connect: {
@@ -50,12 +49,6 @@ function handleEmitterEvents(
           }
         },
         sender: "ASSISTANT"
-      },
-      update: {
-        text: receivedMessage
-      },
-      where: {
-        id: messageId
       }
     });
   });
@@ -90,21 +83,66 @@ export async function handleMessage(message: string, ws: WebSocket) {
       )
     );
   }
+  const parsedMessage = validatedMessage.data;
 
-  const messageData = validatedMessage.data;
+  const humanMessageId = parsedMessage.messageId;
+  const assistantMessageId = uuidv4();
 
-  let assistantMessageId = messageData.messageId;
-  console.log("assistantMessageId", assistantMessageId);
   try {
-    const eventEmitter = await createOpenAIStream(messageData.content);
+    const eventEmitter = await createOpenAIStream(
+      parsedMessage.message,
+      parsedMessage.history
+    );
 
     handleEmitterEvents(
       eventEmitter,
       ws,
-      messageData.messageId ?? "",
-      messageData.chatId
+      assistantMessageId,
+      parsedMessage.chatId
     );
+
+    const messageExists = await prisma.message.findFirst({
+      where: {
+        id: humanMessageId,
+        chat: {
+          id: parsedMessage.chatId
+        }
+      }
+    });
+
+    if (!messageExists) {
+      await prisma.message.create({
+        data: {
+          messageId: humanMessageId,
+          text: parsedMessage.message,
+          chat: {
+            connect: {
+              id: parsedMessage.chatId
+            }
+          },
+          sender: "USER"
+        }
+      });
+    } else {
+      // delete all messages after this message
+      await prisma.message.deleteMany({
+        where: {
+          chat: {
+            id: parsedMessage.chatId
+          },
+          id: {
+            gt: humanMessageId
+          }
+        }
+      });
+    }
   } catch (e) {
     console.error(e);
+    return ws.send(
+      createErrorMessage(
+        ErrorMessageCode.UNEXPECTED_ERROR,
+        "An unexpected error occurred."
+      )
+    );
   }
 }

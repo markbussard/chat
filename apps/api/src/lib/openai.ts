@@ -1,18 +1,32 @@
 import EventEmitter from "events";
 import OpenAI from "openai";
+import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
+
+import { MessageSender } from "@repo/db";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-export async function createOpenAIStream(prompt: string) {
+export async function createOpenAIStream(
+  message: string,
+  history: [MessageSender, string][]
+) {
   const eventEmitter = new EventEmitter();
 
   (async () => {
     try {
+      const messages: ChatCompletionMessageParam[] = history.map(
+        ([sender, text]) => ({
+          role: sender === MessageSender.USER ? "user" : "assistant",
+          content: text
+        })
+      );
+
+      messages.push({ role: "user", content: message });
       const stream = await client.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
+        model: "gpt-4o-mini",
+        messages,
         stream: true
       });
 
