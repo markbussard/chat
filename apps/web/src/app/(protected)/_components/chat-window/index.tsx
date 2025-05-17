@@ -1,5 +1,3 @@
-"use client";
-
 import { ChatConversation } from "~/types/chat";
 import { Chat } from "./chat";
 import { DashboardView } from "./dashboard-view";

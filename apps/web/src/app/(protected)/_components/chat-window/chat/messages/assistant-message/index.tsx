@@ -13,6 +13,7 @@ interface AssistantMessageProps {
 export const AssistantMessage = memo((props: AssistantMessageProps) => {
   const { message, isLastMessage, onRegenerateMessage } = props;
 
+  console.log("rendering assistant message", message);
   return (
     <MessageLayout sender="ASSISTANT">
       <MarkdownRenderer message={message.text} />

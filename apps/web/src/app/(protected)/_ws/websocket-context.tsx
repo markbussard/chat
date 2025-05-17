@@ -11,24 +11,23 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { safeParseJson } from "~/lib/utils";
 import { ChatConversationHistoryMessage } from "~/types/chat";
 import { useMessageStore } from "./message-store";
-import { WebSocketMessage } from "./types";
+import { WebSocketMessageSchema } from "./schema";
+
+interface SendMessageParams {
+  chatId: string;
+  message: string;
+  messageId: string;
+  history: ChatConversationHistoryMessage[];
+}
 
 interface WebSocketContextValue {
   isReady: boolean;
   isError: boolean;
-  sendMessage: ({
-    chatId,
-    message,
-    messageId,
-    history
-  }: {
-    chatId: string;
-    message: string;
-    messageId: string;
-    history: ChatConversationHistoryMessage[];
-  }) => void;
+  sendMessage: (params: SendMessageParams) => void;
+  retryConnection: () => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
@@ -45,11 +44,15 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>(null);
   const retryCountRef = useRef(0);
   const isCleaningUpRef = useRef(false);
+  const connectionEstablishedRef = useRef(false);
+
+  const connectWsRef = useRef<() => void>(null);
+  const attemptReconnectRef = useRef<() => void>(null);
 
   const [isReady, setIsReady] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  const updateStream = useMessageStore((state) => state.updateStream);
+  const setStream = useMessageStore((state) => state.setStream);
   const endStream = useMessageStore((state) => state.endStream);
 
   useEffect(() => {
@@ -68,7 +71,17 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       }, 10000);
 
       ws.addEventListener("message", (event: MessageEvent<string>) => {
-        const wsMessage = JSON.parse(event.data) as WebSocketMessage;
+        const parsedWsMessage = WebSocketMessageSchema.safeParse(
+          safeParseJson(event.data)
+        );
+
+        if (!parsedWsMessage.success) {
+          console.error("Invalid WebSocket message:", parsedWsMessage.error);
+          return;
+        }
+
+        const wsMessage = parsedWsMessage.data;
+
         if (wsMessage.type === "signal" && wsMessage.data.message === "open") {
           const interval = setInterval(() => {
             if (ws.readyState === WebSocket.OPEN) {
@@ -89,10 +102,18 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
           const { type, data } = wsMessage;
           switch (type) {
             case "content":
-              updateStream(data.chatId, data.content);
+              setStream({
+                chatId: data.chatId,
+                content: data.content
+              });
               break;
             case "end":
-              updateStream(data.chatId, data.content, data.messageId, true);
+              setStream({
+                chatId: data.chatId,
+                content: data.content,
+                assistantMessageId: data.messageId,
+                isComplete: true
+              });
               break;
             case "error":
               toast.error(data.error);
@@ -108,27 +129,30 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       ws.onerror = () => {
         clearTimeout(timeoutId);
         setIsReady(false);
-        toast.error("Server connection error");
+        if (!connectionEstablishedRef.current) {
+          toast.dismiss();
+          toast.error("Failed to establish connection to the server");
+        }
       };
 
       ws.onclose = () => {
         clearTimeout(timeoutId);
         setIsReady(false);
         console.debug(new Date(), "ws:disconnected");
-        if (!isCleaningUpRef.current) {
+        attemptReconnect();
+        if (!isCleaningUpRef.current && connectionEstablishedRef.current) {
           toast.error("Connection lost. Attempting to reconnect...");
-          attemptReconnect();
+          connectionEstablishedRef.current = false;
         }
       };
     }
 
-    const attemptReconnect = () => {
+    function attemptReconnect() {
       retryCountRef.current += 1;
 
       if (retryCountRef.current > 3) {
         console.debug(new Date(), "ws:max_retries_reached");
         setIsError(true);
-        toast.error("Unable to connect to server after multiple attempts.");
         return;
       }
 
@@ -145,7 +169,10 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
       reconnectTimeoutRef.current = setTimeout(() => {
         connectWs();
       }, backOffDelay);
-    };
+    }
+
+    connectWsRef.current = connectWs;
+    attemptReconnectRef.current = attemptReconnect;
 
     connectWs();
 
@@ -160,32 +187,54 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
         console.debug(new Date(), "ws:cleanup");
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const sendMessage = useCallback(
-    (payload: {
-      chatId: string;
-      message: string;
-      messageId: string;
-      history: ChatConversationHistoryMessage[];
-    }) => {
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        const message = JSON.stringify(payload);
-        wsRef.current.send(message);
-      }
-    },
-    []
-  );
+  useEffect(() => {
+    if (isError) {
+      toast("Failed to connect to the server", {
+        duration: Infinity,
+        action: {
+          label: "Retry",
+          onClick: () => {
+            if (!connectWsRef.current) {
+              return;
+            }
+            toast.dismiss();
+            retryCountRef.current = 0;
+            setIsError(false);
+            connectWsRef.current();
+          }
+        }
+      });
+    }
+  }, [isError]);
 
-  const contextValue = useMemo(
-    () => ({
-      webSocket: wsRef.current,
+  const sendMessage = useCallback((params: SendMessageParams) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      const message = JSON.stringify(params);
+      wsRef.current.send(message);
+    }
+  }, []);
+
+  const retryConnection = useCallback(() => {
+    if (!connectWsRef.current) {
+      return;
+    }
+
+    retryCountRef.current = 0;
+    setIsError(false);
+    connectWsRef.current();
+  }, []);
+
+  const contextValue = useMemo(() => {
+    return {
       isReady,
       isError,
-      sendMessage
-    }),
-    [isReady, isError, sendMessage]
-  );
+      sendMessage,
+      retryConnection
+    };
+  }, [isReady, isError, sendMessage, retryConnection]);
 
   return (
     <WebSocketContext.Provider value={contextValue}>
