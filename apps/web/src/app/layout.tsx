@@ -1,18 +1,19 @@
-import "./globals.css";
-
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono as FontMono, Inter as FontSans } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 
+import { Toaster } from "~/components/ui/sonner";
 import { META_THEME_COLORS } from "~/constants";
 import { cn } from "~/lib/utils";
-import { Providers } from "./providers";
 
-const fontSans = FontSans({
+import "./globals.css";
+
+const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans"
 });
 
-const fontMono = FontMono({
+const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono"
 });
@@ -52,7 +53,15 @@ export default function RootLayout({
           fontMono.variable
         )}
       >
-        <Providers>{children}</Providers>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
