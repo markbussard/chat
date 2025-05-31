@@ -20,10 +20,8 @@ export default async function ProtectedLayout({
     <SidebarProvider defaultOpen={sidebarDefaultOpen}>
       <AppSidebar />
       <WebSocketProvider>
-        <main className="relative flex h-screen max-w-full flex-1 flex-col overflow-y-hidden">
-          <div className="relative h-full w-full flex-1">
-            <div className="relative flex h-full flex-col">{children}</div>
-          </div>
+        <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+          {children}
         </main>
       </WebSocketProvider>
     </SidebarProvider>

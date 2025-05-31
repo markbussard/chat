@@ -16,8 +16,9 @@ import {
 } from "~/types/chat";
 import { MessageInput } from "../message-input";
 import { ChatHeader } from "./header";
-import { Messages } from "./messages";
+import { AssistantMessage, StreamingMessage, UserMessage } from "./messages";
 import { ScrollToBottom } from "./scroll-to-bottom";
+import { StickToBottomContent } from "./stick-to-bottom-content";
 
 interface ChatProps {
   chat: ChatConversation;
@@ -26,11 +27,11 @@ interface ChatProps {
 export const Chat = (props: ChatProps) => {
   const { chat } = props;
 
+  const ws = useWebSocket();
+
   const [messages, setMessages] = useState<ChatConversationMessage[]>(
     chat.messages
   );
-
-  const ws = useWebSocket();
 
   const { streamingMessage, endStream } = useMessageStore(
     useShallow((state) => ({
@@ -130,30 +131,44 @@ export const Chat = (props: ChatProps) => {
 
   return (
     <>
-      <div>
-        <ChatHeader id={chat.id} name={chat.name} />
-      </div>
+      <ChatHeader id={chat.id} name={chat.name} />
       <StickToBottom
-        className="relative flex w-full flex-1 flex-col items-center justify-center overflow-x-hidden pl-3"
-        resize="smooth"
         initial="instant"
+        resize="smooth"
+        className="relative flex-1 overflow-hidden"
       >
-        <Messages
-          messages={messages}
-          streamingMessage={streamingMessage}
-          onRegenerateMessage={handleRegenerateMessage}
+        <StickToBottomContent
+          content={
+            <>
+              {messages.map((message, index) => {
+                return message.sender === "USER" ? (
+                  <UserMessage key={message.messageId} message={message} />
+                ) : (
+                  <AssistantMessage
+                    key={message.messageId}
+                    message={message}
+                    onRegenerateMessage={handleRegenerateMessage}
+                    isLastMessage={index === messages.length - 1}
+                  />
+                );
+              })}
+              {streamingMessage && (
+                <StreamingMessage message={streamingMessage} />
+              )}
+            </>
+          }
+          footer={
+            <>
+              <ScrollToBottom />
+              <MessageInput
+                isChatPage
+                sendMessage={handleSendMessage}
+                focusMode={ChatFocusMode.WEB_SEARCH}
+                onFocusModeChange={() => {}}
+              />
+            </>
+          }
         />
-        <ScrollToBottom />
-        <div className="sticky bottom-0 z-20 flex w-full bg-background pr-3">
-          <div className="mx-6 mb-4 flex w-full items-center justify-center">
-            <MessageInput
-              isChatPage
-              sendMessage={handleSendMessage}
-              focusMode={ChatFocusMode.WEB_SEARCH}
-              onFocusModeChange={() => {}}
-            />
-          </div>
-        </div>
       </StickToBottom>
     </>
   );

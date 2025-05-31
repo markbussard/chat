@@ -55,7 +55,7 @@ export const DashboardView = () => {
 
   return (
     <div className="mx-auto flex h-full w-full max-w-7xl flex-col items-center justify-center gap-6 overflow-y-auto px-2 py-6">
-      <div className="absolute top-[14px] left-2 z-1">
+      <div className="absolute top-[10px] left-2 z-1">
         <SidebarTrigger />
       </div>
       <h1 className="text-3xl font-semibold">How can I help you?</h1>

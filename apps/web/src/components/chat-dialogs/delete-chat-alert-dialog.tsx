@@ -42,10 +42,7 @@ export const DeleteChatAlertDialog = (props: DeleteChatDialogProps) => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel autoFocus={false}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={handleConfirmDelete}
-          >
+          <AlertDialogAction onClick={handleConfirmDelete}>
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>
