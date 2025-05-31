@@ -1,7 +1,7 @@
 import { memo } from "react";
 
 import { ChatConversationMessage } from "~/types/chat";
-import { MarkdownRenderer, MessageLayout } from "../common";
+import { MarkdownText, MessageLayout } from "../common";
 import { AssistantMessageActions } from "./actions";
 
 interface AssistantMessageProps {
@@ -13,9 +13,10 @@ interface AssistantMessageProps {
 export const AssistantMessage = memo((props: AssistantMessageProps) => {
   const { message, isLastMessage, onRegenerateMessage } = props;
 
+  console.log("rendering assistant message", message);
   return (
     <MessageLayout sender="ASSISTANT">
-      <MarkdownRenderer message={message.text} />
+      <MarkdownText>{message.text}</MarkdownText>
       <AssistantMessageActions
         message={message}
         isLastMessage={isLastMessage}

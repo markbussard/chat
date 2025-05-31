@@ -30,8 +30,8 @@ export const ChatHeader = (props: ChatHeaderProps) => {
   };
 
   return (
-    <header className="sticky inset-x-0 top-0 z-10 flex shrink-0 items-center border-b bg-background">
-      <div className="flex h-14 w-full items-center gap-2 px-2">
+    <header className="relative z-10 flex items-center bg-background">
+      <div className="relative flex h-12 items-center gap-2 px-2">
         <SidebarTrigger />
         <Separator
           orientation="vertical"
@@ -66,6 +66,7 @@ export const ChatHeader = (props: ChatHeaderProps) => {
           chatId={id}
         />
       </div>
+      <div className="absolute inset-x-0 top-full h-5 bg-gradient-to-b from-background to-background/0" />
     </header>
   );
 };

@@ -1,7 +1,10 @@
-import { use, useEffect, useMemo, useState } from "react";
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { StickToBottom } from "use-stick-to-bottom";
 import { v4 as uuidv4 } from "uuid";
+import { useShallow } from "zustand/react/shallow";
 
 import { MessageSender } from "@repo/db";
 
@@ -13,8 +16,9 @@ import {
 } from "~/types/chat";
 import { MessageInput } from "../message-input";
 import { ChatHeader } from "./header";
-import { Messages } from "./messages";
+import { AssistantMessage, StreamingMessage, UserMessage } from "./messages";
 import { ScrollToBottom } from "./scroll-to-bottom";
+import { StickToBottomContent } from "./stick-to-bottom-content";
 
 interface ChatProps {
   chat: ChatConversation;
@@ -23,21 +27,22 @@ interface ChatProps {
 export const Chat = (props: ChatProps) => {
   const { chat } = props;
 
-  const [chatHistory, setChatHistory] = useState<[MessageSender, string][]>(
-    chat.messages.map((message) => [message.sender, message.text])
-  );
+  const ws = useWebSocket();
+
   const [messages, setMessages] = useState<ChatConversationMessage[]>(
     chat.messages
   );
 
-  const ws = useWebSocket();
-
-  const { getActiveStream, endStream } = useMessageStore();
-
-  const streamingMessage = getActiveStream(chat.id);
+  const { streamingMessage, endStream } = useMessageStore(
+    useShallow((state) => ({
+      streamingMessage: state.activeStreams[chat.id],
+      endStream: state.endStream
+    }))
+  );
 
   useEffect(() => {
     if (streamingMessage && streamingMessage.isComplete) {
+      console.log("streamingMessage", streamingMessage);
       setMessages((prevMessages) => [
         ...prevMessages,
         {
@@ -47,33 +52,24 @@ export const Chat = (props: ChatProps) => {
           updatedAt: new Date()
         }
       ]);
-      setChatHistory((prev) => [
-        ...prev,
-        [MessageSender.ASSISTANT, streamingMessage.content]
-      ]);
       endStream(chat.id);
     }
   }, [streamingMessage, chat.id, endStream]);
 
-  const handleSendMessage = async (message: string, messageId?: string) => {
-    if (streamingMessage) {
-      return;
-    }
+  const handleSendMessage = useCallback(
+    async (message: string) => {
+      if (!ws || !ws.isReady) {
+        toast.error("Cannot send message while disconnected");
+        return;
+      }
 
-    if (!ws || !ws.isReady) {
-      toast.error("Cannot send message while disconnected");
-      return;
-    }
+      const history = [
+        ...messages.map((message) => [message.sender, message.text]),
+        [MessageSender.USER, message]
+      ] as [MessageSender, string][];
 
-    messageId = messageId ?? uuidv4();
+      const messageId = uuidv4();
 
-    try {
-      ws.sendMessage({
-        chatId: chat.id,
-        message,
-        messageId,
-        history: [...chatHistory, [MessageSender.USER, message]]
-      });
       setMessages((prevMessages) => [
         ...prevMessages,
         {
@@ -83,59 +79,96 @@ export const Chat = (props: ChatProps) => {
           updatedAt: new Date()
         }
       ]);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      toast.error("Failed to send message");
-    }
-  };
 
-  const handleRegenerateMessage = (messageId: string) => {
-    const index = messages.findIndex((msg) => msg.messageId === messageId);
-    const message = messages[index - 1];
-    if (index === -1 || !message) {
-      return;
-    }
+      try {
+        ws.sendMessage({
+          chatId: chat.id,
+          message,
+          messageId,
+          history
+        });
+      } catch (error) {
+        console.error("Error sending message:", error);
+        toast.error("Failed to send message");
+      }
+    },
+    [ws, chat.id, messages]
+  );
 
-    setMessages((prev) => {
-      return [...prev.slice(0, messages.length > 2 ? index - 1 : 0)];
-    });
-    setChatHistory((prev) => {
-      return [...prev.slice(0, messages.length > 2 ? index - 1 : 0)];
-    });
+  const handleRegenerateMessage = useCallback(
+    (messageId: string) => {
+      if (!ws || !ws.isReady) {
+        toast.error("Cannot regenerate message while disconnected");
+        return;
+      }
 
-    handleSendMessage(message.text, messageId);
-  };
+      const index = messages.findIndex((msg) => msg.messageId === messageId);
+      const message = messages[index - 1];
+      if (index === -1 || !message) {
+        return;
+      }
 
-  const memoizedMessages = useMemo(() => {
-    return messages;
-  }, [messages]);
+      const history = [
+        ...messages
+          .map((message) => [message.sender, message.text])
+          .slice(0, index - 1),
+        [MessageSender.USER, message.text]
+      ] as [MessageSender, string][];
+
+      setMessages((prev) => {
+        return [...prev.slice(0, index - 1)];
+      });
+
+      ws.sendMessage({
+        chatId: chat.id,
+        message: message.text,
+        messageId,
+        history: [...history, [MessageSender.USER, message.text]]
+      });
+    },
+    [chat.id, messages, ws]
+  );
 
   return (
     <>
-      <div>
-        <ChatHeader id={chat.id} name={chat.name} />
-      </div>
+      <ChatHeader id={chat.id} name={chat.name} />
       <StickToBottom
-        className="relative flex w-full flex-1 flex-col items-center justify-center overflow-hidden pl-3"
-        resize="smooth"
         initial="instant"
+        resize="smooth"
+        className="relative flex-1 overflow-hidden"
       >
-        <Messages
-          messages={memoizedMessages}
-          onRegenerateMessage={handleRegenerateMessage}
-          streamingMessage={streamingMessage}
+        <StickToBottomContent
+          content={
+            <>
+              {messages.map((message, index) => {
+                return message.sender === "USER" ? (
+                  <UserMessage key={message.messageId} message={message} />
+                ) : (
+                  <AssistantMessage
+                    key={message.messageId}
+                    message={message}
+                    onRegenerateMessage={handleRegenerateMessage}
+                    isLastMessage={index === messages.length - 1}
+                  />
+                );
+              })}
+              {streamingMessage && (
+                <StreamingMessage message={streamingMessage} />
+              )}
+            </>
+          }
+          footer={
+            <>
+              <ScrollToBottom />
+              <MessageInput
+                isChatPage
+                sendMessage={handleSendMessage}
+                focusMode={ChatFocusMode.WEB_SEARCH}
+                onFocusModeChange={() => {}}
+              />
+            </>
+          }
         />
-        <ScrollToBottom />
-        <div className="sticky bottom-0 z-20 flex w-full bg-background pr-3">
-          <div className="mx-6 mb-4 flex w-full items-center justify-center">
-            <MessageInput
-              isChatPage
-              sendMessage={handleSendMessage}
-              focusMode={ChatFocusMode.WEB_SEARCH}
-              onFocusModeChange={() => {}}
-            />
-          </div>
-        </div>
       </StickToBottom>
     </>
   );
